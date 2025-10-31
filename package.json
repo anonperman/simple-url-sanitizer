@@ -1,0 +1,60 @@
+{
+  "name": "simple-url-sanitizer",
+  "version": "0.0.1",
+  "description": "Advanced URL sanitization with comprehensive security filtering for safe sharing",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "format:check": "prettier --check src/**/*.ts",
+    "security:audit": "npm audit --audit-level moderate",
+    "analyze": "npm run lint && npm run format:check && npm run security:audit",
+    "prepublishOnly": "npm run analyze && npm run test:run && npm run build",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "url",
+    "sanitization",
+    "security",
+    "xss",
+    "owasp",
+    "parameter-filtering",
+    "web-security",
+    "url-validation"
+  ],
+  "author": "URL Sanitizer Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/simple-url-sanitizer/simple-url-sanitizer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/simple-url-sanitizer/simple-url-sanitizer/issues"
+  },
+  "homepage": "https://github.com/simple-url-sanitizer/simple-url-sanitizer#readme",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "dependencies": {
+    "@braintree/sanitize-url": "^7.1.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
