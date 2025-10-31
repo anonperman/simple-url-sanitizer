@@ -9,7 +9,9 @@ A URL sanitization library designed for secure sharing functions. Implements a h
 
 **IMPORTANT: This library provides security measures but cannot guarantee complete protection against all possible attack vectors. URL sanitization is a complex security problem, and no solution is 100% foolproof.**
 
-- This library could be used as part of a comprehensive security strategy
+- This library could be used as part of a comprehensive security strategy, but its use does not imply or guarantee security or compliance.
+  You are solely responsible for evaluating its suitability for your use case and for implementing all necessary security measures.
+  The authors and contributors disclaim all liability for any damages or losses resulting from the use of this library.
 - Always implement additional security measures (CSP, input validation, output encoding, etc.)
 - Regularly update dependencies and monitor for security vulnerabilities
 - Test thoroughly in your specific use case
