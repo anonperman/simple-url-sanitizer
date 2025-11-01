@@ -9,7 +9,9 @@ import {
   isUrlSafeForSharing,
   extractSafeParameters,
   SAFE_URL_PARAMETERS,
-  DANGEROUS_URL_PARAMETERS
+  DANGEROUS_URL_PARAMETERS,
+  isValidUrl,
+  sanitizeUrl
 } from './index';
 
 describe('URL Sanitization Library', () => {
@@ -173,6 +175,57 @@ describe('URL Sanitization Library', () => {
       const url = 'https://example.com?param=onmouseover=alert(1)';
       const result = sanitizeUrlForSharing(url);
       expect(result).toBe('https://example.com/'); // @braintree/sanitize-url normalizes
+    });
+  });
+
+  describe('isValidUrl', () => {
+    it('should return true for valid URLs', () => {
+      expect(isValidUrl('https://example.com')).toBe(true);
+      expect(isValidUrl('http://example.com')).toBe(true);
+      expect(isValidUrl('https://example.com?param=value')).toBe(true);
+      expect(isValidUrl('https://example.com#section')).toBe(true);
+    });
+
+    it('should return false for invalid URLs', () => {
+      expect(isValidUrl('')).toBe(false);
+      expect(isValidUrl(null as any)).toBe(false);
+      expect(isValidUrl(undefined as any)).toBe(false);
+      expect(isValidUrl('not-a-url')).toBe(false);
+    });
+
+    it('should reject dangerous protocols', () => {
+      expect(isValidUrl('javascript:alert(1)')).toBe(false);
+      expect(isValidUrl('data:text/html,<script>')).toBe(false);
+      expect(isValidUrl('file:///etc/passwd')).toBe(false);
+      expect(isValidUrl('ftp://example.com')).toBe(false);
+      expect(isValidUrl('custom://example.com')).toBe(false);
+    });
+
+    it('should reject dangerous hostnames', () => {
+      expect(isValidUrl('http://localhost')).toBe(false);
+      expect(isValidUrl('http://127.0.0.1')).toBe(false);
+      expect(isValidUrl('http://10.0.0.1')).toBe(false);
+    });
+  });
+
+  describe('sanitizeUrl', () => {
+    it('should return sanitized URL for valid URLs', () => {
+      expect(sanitizeUrl('https://example.com')).toBe('https://example.com');
+      expect(sanitizeUrl('http://example.com')).toBe('http://example.com');
+      expect(sanitizeUrl('https://example.com?param=value')).toBe('https://example.com/?param=value');
+      expect(sanitizeUrl('https://example.com/path')).toBe('https://example.com/path');
+    });
+
+    it('should return null for invalid URLs', () => {
+      expect(sanitizeUrl('')).toBeNull();
+      expect(sanitizeUrl(null as any)).toBeNull();
+      expect(sanitizeUrl('javascript:alert(1)')).toBeNull();
+      expect(sanitizeUrl('http://localhost')).toBeNull();
+    });
+
+    it('should handle malformed URLs', () => {
+      expect(sanitizeUrl('not-a-url')).toBeNull();
+      expect(sanitizeUrl('htp://example.com')).toBeNull();
     });
   });
 });

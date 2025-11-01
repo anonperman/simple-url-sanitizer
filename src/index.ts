@@ -11,7 +11,7 @@
  * security measures as needed.
  */
 
-import { sanitizeUrl } from '@braintree/sanitize-url';
+import { sanitizeUrl as braintreeSanitizeUrl } from '@braintree/sanitize-url';
 
 // For CommonJS compatibility, we can also use:
 // const { sanitizeUrl } = require('@braintree/sanitize-url');
@@ -142,7 +142,7 @@ export function sanitizeUrlForSharing(
 
   try {
     // First, use @braintree/sanitize-url for protocol-level protection
-    const protocolSanitized = sanitizeUrl(url);
+    const protocolSanitized = braintreeSanitizeUrl(url);
 
     // If the URL was completely sanitized (made safe), return null for dangerous protocols
     if (protocolSanitized === 'about:blank') {
@@ -253,6 +253,91 @@ function isSuspiciousValue(value: string): boolean {
   ];
 
   return suspiciousPatterns.some(pattern => pattern.test(lowerValue));
+}
+
+/**
+ * Validates that a URL is properly formatted and uses safe protocols
+ * This is a basic validation that allows URLs with query parameters
+ *
+ * @param url - The URL to validate
+ * @returns true if URL is valid and safe, false otherwise
+ */
+export function isValidUrl(url: string): boolean {
+  if (typeof url !== 'string' || !url.trim()) {
+    return false;
+  }
+
+  try {
+    const urlObj = new URL(url);
+
+    // Only allow http and https protocols
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return false;
+    }
+
+    // Reject dangerous hostnames
+    if (isDangerousHostname(urlObj.hostname)) {
+      return false;
+    }
+
+    // Basic hostname validation
+    if (!urlObj.hostname || urlObj.hostname.length < 4) {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Sanitizes a URL using @braintree/sanitize-url for basic XSS prevention
+ * This is a simpler sanitization than sanitizeUrlForSharing
+ *
+ * @param url - The URL to sanitize
+ * @returns Sanitized URL or null if invalid
+ */
+export function sanitizeUrl(url: string): string | null {
+  if (typeof url !== 'string' || !url.trim()) {
+    return null;
+  }
+
+  try {
+    // First validate the URL structure ourselves to catch malformed URLs
+    const urlObj = new URL(url);
+
+    // Only allow http and https protocols
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return null;
+    }
+
+    // Reject dangerous protocols (double check)
+    const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:', 'ftp:'];
+    if (dangerousProtocols.some(protocol => url.toLowerCase().startsWith(protocol))) {
+      return null;
+    }
+
+    // Reject dangerous hostnames
+    if (isDangerousHostname(urlObj.hostname)) {
+      return null;
+    }
+
+    // Use @braintree/sanitize-url for XSS prevention
+    const sanitized = braintreeSanitizeUrl(url);
+    if (!sanitized || sanitized === 'about:blank') {
+      return null;
+    }
+
+    // Remove trailing slash if the original didn't have a path
+    if (!urlObj.pathname || urlObj.pathname === '/') {
+      return sanitized.replace(/\/$/, '');
+    }
+
+    return sanitized;
+  } catch (error) {
+    return null;
+  }
 }
 
 /**
