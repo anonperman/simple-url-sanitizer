@@ -157,6 +157,11 @@ export function sanitizeUrlForSharing(
       return null;
     }
 
+    // If URL has no query parameters, return it as-is (no parameters to filter)
+    if (!urlObj.search || urlObj.search === '') {
+      return urlObj.toString();
+    }
+
     // Filter query parameters
     const filteredParams = new URLSearchParams();
 
